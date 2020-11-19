@@ -5,40 +5,61 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import pandas as pd
 
 # Imports from this application
 from app import app
 
-# 2 column layout. 1st column width = 4/12
-# https://dash-bootstrap-components.opensource.faculty.ai/l/components/layout
-column1 = dbc.Col(
+# data to be loaded
+data = [['Alex', 10], ['Bob', 12], ['Clarke', 13], ['Alex', 100]]
+df = pd.DataFrame(data, columns=['Name', 'Mark'])
+
+property_card = dbc.Card(
     [
-        dcc.Markdown(
-            """
-        
-            ## Your Value Proposition
+        dbc.CardHeader("Property Type"),
+        dbc.CardBody([
+            html.H6("Select Type", className="card-title"),
+            dcc.Dropdown(
+                id='property_type',
+                options=[
+                    {'label': 'Apartment', 'value': 'Apartment'},
+                    {'label': 'Condominium', 'value': 'Condominium'},
+                    {'label': 'Loft', 'value': 'Loft'},
+                    {'label': 'House', 'value': 'House'},
+                    {'label': 'Serviced Apartment', 'value': 'Serviced apartment'},
+                    {'label': 'Hostel', 'value': 'Hostel'},
+                    {'label': 'Townhouse', 'value': 'Townhouse'},
+                    {'label': 'Guest Suite', 'value': 'Guest suite'},
+                    {'label': 'Bed & Breakfast', 'value': 'Bed & breakfast'},
+                    {'label': 'Guesthouse', 'value': 'Guesthouse'},
+                    {'label': 'Hotel', 'value': 'Hotel'},
+                    {'label': 'Other', 'value': 'Other'},
+                    {'label': 'Boutique Hotel', 'value': 'Boutique hotel'}
 
-            Emphasize how the app will benefit users. Don't emphasize the underlying technology.
-
-            ✅ RUN is a running app that adapts to your fitness levels and designs personalized workouts to help you improve your running.
-
-            ❌ RUN is the only intelligent running app that uses sophisticated deep neural net machine learning to make your run smarter because we believe in ML driven workouts.
-
-            """
-        ),
-        dcc.Link(dbc.Button('Your Call To Action', color='primary'), href='/predictions')
-    ],
-    md=4,
-)
-
-gapminder = px.data.gapminder()
-fig = px.scatter(gapminder.query("year==2007"), x="gdpPercap", y="lifeExp", size="pop", color="continent",
-           hover_name="country", log_x=True, size_max=60)
-
-column2 = dbc.Col(
-    [
-        dcc.Graph(figure=fig),
+                ],
+                value='Loft',
+                className='mb-4',
+            )
+        ])
     ]
 )
 
-layout = dbc.Row([column1, column2])
+host_card = dbc.Card(
+    [
+        dbc.CardHeader("Property Amenities"),
+        dbc.CardBody([
+            html.H6("Write in Amenities"),
+            dbc.Textarea(
+                invalid=False,
+                bs_size="sm",
+                id='amenities',
+                placeholder="Example:\n"
+                            "A loft with 2 bedrooms, patio and WiFi internet. "
+                            "Prefer first floor and no stairs with a view of the ocean.",
+                style={'width': '100%', 'height': '80%'},
+            )
+        ])
+    ]
+)
+
+layout = dbc.Row([dbc.CardDeck(dbc.Col([property_card, host_card]))])

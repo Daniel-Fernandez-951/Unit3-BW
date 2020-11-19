@@ -19,9 +19,9 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dcc.Link('Process', href='/process', className='nav-link')), 
     ],
     sticky='top',
-    color='#5CB0AA',
-    light=False,
-    dark=False
+    color='dark',
+    light=True,
+    dark=True
 )
 
 # Footer docs:
