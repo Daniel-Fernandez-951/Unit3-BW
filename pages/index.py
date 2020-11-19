@@ -10,10 +10,6 @@ import pandas as pd
 # Imports from this application
 from app import app
 
-# data to be loaded
-data = [['Alex', 10], ['Bob', 12], ['Clarke', 13], ['Alex', 100]]
-df = pd.DataFrame(data, columns=['Name', 'Mark'])
-
 property_card = dbc.Card(
     [
         dbc.CardHeader("Property Type"),
@@ -38,10 +34,11 @@ property_card = dbc.Card(
 
                 ],
                 value='Loft',
-                className='mb-4',
+                className='mb-1',
             )
         ])
-    ]
+    ],
+    className='mb-1'
 )
 
 host_card = dbc.Card(
@@ -49,6 +46,7 @@ host_card = dbc.Card(
         dbc.CardHeader("Property Amenities"),
         dbc.CardBody([
             html.H6("Write in Amenities"),
+            dbc.Badge("Success", color="success", className="mr-1"),
             dbc.Textarea(
                 invalid=False,
                 bs_size="sm",
@@ -59,7 +57,8 @@ host_card = dbc.Card(
                 style={'width': '100%', 'height': '80%'},
             )
         ])
-    ]
+    ],
+    className='mb-1'
 )
 
-layout = dbc.Row([dbc.CardDeck(dbc.Col([property_card, host_card]))])
+layout = dbc.Row([dbc.CardDeck(dbc.Col([property_card, host_card]), style={'width': '50%'})])

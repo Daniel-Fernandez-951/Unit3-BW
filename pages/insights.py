@@ -10,57 +10,35 @@ from app import app
 
 # 1 column layout
 # https://dash-bootstrap-components.opensource.faculty.ai/l/components/layout
-input_block = dbc.FormGroup(
+email_input = html.Div(
     [
-        html.H6('Property Type', style={
-            'textAlign': 'center'
-        }),
-        dcc.Dropdown(
-            id='dropdown',
-            options=[
-                {'label': 'Apartment', 'value': 'Apartment'},
-                {'label': 'Condominium', 'value': 'Condominium'},
-                {'label': 'Loft', 'value': 'Loft'},
-                {'label': 'House', 'value': 'House'},
-                {'label': 'Serviced Apartment', 'value': 'Serviced apartment'},
-                {'label': 'Hostel', 'value': 'Hostel'},
-                {'label': 'Townhouse', 'value': 'Townhouse'},
-                {'label': 'Guest Suite', 'value': 'Guest suite'},
-                {'label': 'Bed & Breakfast', 'value': 'Bed & breakfast'},
-                {'label': 'Guesthouse', 'value': 'Guesthouse'},
-                {'label': 'Hotel', 'value': 'Hotel'},
-                {'label': 'Other', 'value': 'Other'},
-                {'label': 'Boutique Hotel', 'value': 'Boutique hotel'}
-            ],
-            placeholder='Loft',  # default value
-            multi=False,
-            style={'margin': 'auto'}
-        ),
-        html.Br(),
-        html.H6('Write in Amenities', style={
-            'textAlign': 'center'
-        }),
-        dbc.Textarea(
-            invalid=False,
-            bs_size="sm",
-            id='amenities',
-            placeholder="Example:\n"
-                        "A loft with 2 bedrooms, patio and WiFi internet. "
-                        "Prefer first floor and no stairs with a view of the ocean.",
-            style={'margin': 'auto'},
-        ),
-        html.Br(),
-        dbc.Button(
-            id='submit_button',
-            n_clicks=0,
-            children='Submit',
-            className='mr-1',
-            color="success",
-            block=True,
-            outline=False
-        ),
-    ],
-    style={'align': 'left', 'width': '33%'}
+        dbc.FormGroup(
+            [
+                dbc.Label("Email"),
+                dbc.Input(id="email-input", type="email", value=""),
+                dbc.FormText("We only accept gmail..."),
+                dbc.FormFeedback(
+                    "That looks like a gmail address :-)", valid=True
+                ),
+                dbc.FormFeedback(
+                    "Sorry, we only accept gmail for some reason...",
+                    valid=False,
+                ),
+            ]
+        )
+    ]
 )
 
-layout = dbc.Col(input_block)
+
+# --- Callbacks --- #
+@app.callback(
+    [Output("email-input", "valid"), Output("email-input", "invalid")],
+    [Input("email-input", "value")],
+)
+def check_validity(text):
+    if text:
+        is_gmail = text.endswith("@gmail.com")
+        return is_gmail, not is_gmail
+    return False, False
+
+layout = dbc.Col(email_input)
