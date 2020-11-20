@@ -1,5 +1,7 @@
 # A Night in Berlin: Predicting Airbnb prices in Berlin
 
+## Authors: Rebecca Duke Wiesenberg, Daniel Fernandez, Robert Giuffre
+
 ## Dash template
 
 [Dash Template](https://lambdaschool.github.io/ds/unit2/dash-template/)
