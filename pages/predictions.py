@@ -61,7 +61,7 @@ input_block = dbc.FormGroup(
         dbc.FormText("Write in what you'd like, in English or German!"),
         html.Br(),
         dbc.Button(
-            id='submit_button',
+            id='submit-button',
             n_clicks=0,
             children='Submit',
             className='mr-1',
@@ -86,9 +86,10 @@ row = html.Div(
             [
                 dbc.Col((html.Div(input_block))),
                 dbc.Col([
-                    html.H1("Expected Price"),
-                    html.Div(id='prediction-content')
-                ])
+                    html.H1("Expected Price", className='mb-2'),
+                    dbc.Alert(id='prediction-content', color='info')
+                    # html.H4(id='prediction-content')
+                ], style={'margin': 'auto'})
             ]
         )
     ]
@@ -97,27 +98,31 @@ row = html.Div(
 
 @app.callback(
     Output('prediction-content', 'children'),
-    [Input('dropdown', 'value'), Input('amenities', 'value')],
+    [Input('submit-button', 'n_clicks'), Input('dropdown', 'value'), Input('amenities', 'value')]
 )
-def predict(dropdown, amenities):
-    property_type = [dropdown]
-    description_text = amenities
-    building = encoder.transform(property_type)
-    building = keras.utils.to_categorical(building, 13)
+def predict(n_clicks, dropdown, amenities):
+    if n_clicks > 0:
+        property_type = [dropdown]
+        description_text = amenities
+        building = encoder.transform(property_type)
+        building = keras.utils.to_categorical(building, 13)
 
-    max_seq_length = 170
-    embed = tokenizer.texts_to_sequences(description_text)
-    embed = keras.preprocessing.sequence.pad_sequences(
-        embed, maxlen=max_seq_length, padding="post")
+        max_seq_length = 170
+        embed = tokenizer.texts_to_sequences(description_text)
+        embed = keras.preprocessing.sequence.pad_sequences(
+            embed, maxlen=max_seq_length, padding="post")
 
-    description_bow = tokenizer.texts_to_matrix(description_text)
-    building_transform = [list(building[0]) for n in range(description_bow.shape[0])]
-    building = np.array(building_transform)
+        description_bow = tokenizer.texts_to_matrix(description_text)
+        building_transform = [list(building[0]) for n in range(description_bow.shape[0])]
+        building = np.array(building_transform)
 
-    predictions = combined.predict([description_bow, building] + [embed])
-    val = predictions[0]
-
-    return f'The estimated rent is ${"{:.2f}".format(val[0])} per night.'
+        predictions = combined.predict([description_bow, building] + [embed])
+        val = float(predictions.mean())
+        return f'Estimated rent is ${round(val, 2)} per night.'
+    elif n_clicks == 0:
+        return "⤶\t\tGimme something to predict, please!\t🤖\t"
+    else:
+        pass
 
 
 layout = row
