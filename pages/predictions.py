@@ -10,20 +10,6 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-# from sklearn.pipeline import Pipeline
-# from tensorflow.keras import Sequential, regularizers
-#
-# from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Flatten, ReLU
-# from tensorflow.keras.activations import sigmoid, softmax, relu
-#
-# from spacy.tokenizer import Tokenizer
-# from sklearn.pipeline import Pipeline
-# from sklearn.neighbors import NearestNeighbors
-# from gensim.models import LdaMulticore
-# from gensim.corpora import Dictionary
-#
-# from sklearn.preprocessing import LabelEncoder
-# from sklearn.pipeline import Pipeline
 import joblib
 from keras.models import load_model
 
