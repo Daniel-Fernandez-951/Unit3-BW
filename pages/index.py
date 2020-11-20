@@ -4,61 +4,128 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.express as px
+
+# Model pip installs
 import pandas as pd
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+import joblib
+from keras.models import load_model
+
+from joblib import load
+
+tokenizer = load('assets/tokenizer.joblib')
+encoder = joblib.load('assets/label_encoder.joblib')
+combined = load_model('assets/best_model.h5')
 
 # Imports from this application
 from app import app
 
-property_card = dbc.Card(
+# 2 column layout. 1st column width = 4/12
+# https://dash-bootstrap-components.opensource.faculty.ai/l/components/layout
+input_block = dbc.FormGroup(
     [
-        dbc.CardHeader("Property Type"),
-        dbc.CardBody([
-            html.H6("Select Type", className="card-title"),
-            dcc.Dropdown(
-                id='property_type',
-                options=[
-                    {'label': 'Apartment', 'value': 'Apartment'},
-                    {'label': 'Condominium', 'value': 'Condominium'},
-                    {'label': 'Loft', 'value': 'Loft'},
-                    {'label': 'House', 'value': 'House'},
-                    {'label': 'Serviced Apartment', 'value': 'Serviced apartment'},
-                    {'label': 'Hostel', 'value': 'Hostel'},
-                    {'label': 'Townhouse', 'value': 'Townhouse'},
-                    {'label': 'Guest Suite', 'value': 'Guest suite'},
-                    {'label': 'Bed & Breakfast', 'value': 'Bed & breakfast'},
-                    {'label': 'Guesthouse', 'value': 'Guesthouse'},
-                    {'label': 'Hotel', 'value': 'Hotel'},
-                    {'label': 'Other', 'value': 'Other'},
-                    {'label': 'Boutique Hotel', 'value': 'Boutique hotel'}
-
-                ],
-                value='Loft',
-                className='mb-1',
-            )
-        ])
+        dbc.Label("Property Type"),
+        dcc.Dropdown(
+            id='dropdown',
+            options=[
+                {'label': 'Apartment', 'value': 'Apartment'},
+                {'label': 'Condominium', 'value': 'Condominium'},
+                {'label': 'Loft', 'value': 'Loft'},
+                {'label': 'House', 'value': 'House'},
+                {'label': 'Serviced Apartment', 'value': 'Serviced apartment'},
+                {'label': 'Hostel', 'value': 'Hostel'},
+                {'label': 'Townhouse', 'value': 'Townhouse'},
+                {'label': 'Guest Suite', 'value': 'Guest suite'},
+                {'label': 'Bed & Breakfast', 'value': 'Bed & breakfast'},
+                {'label': 'Guesthouse', 'value': 'Guesthouse'},
+                {'label': 'Hotel', 'value': 'Hotel'},
+                {'label': 'Other', 'value': 'Other'},
+                {'label': 'Boutique Hotel', 'value': 'Boutique hotel'}
+            ],
+            value='Loft',  # default value
+            multi=False,
+            style={'margin': 'auto'}
+        ),
+        dbc.FormText("Pick one."),
+        html.Br(),
+        dbc.Label("What are you looking for?"),
+        dbc.Textarea(
+            invalid=False,
+            bs_size="sm",
+            id='amenities',
+            value="Has 2 bedrooms, patio and WiFi internet. Prefer first floor and no stairs with a view of the ocean.",
+            style={'margin': 'auto'},
+        ),
+        dbc.FormText("Write in what you'd like, in English or German!"),
+        html.Br(),
+        dbc.Button(
+            id='submit-button',
+            n_clicks=0,
+            children='Submit',
+            className='mr-1',
+            color="success",
+            block=True,
+            outline=False
+        ),
     ],
-    className='mb-1'
+    style={'align': 'left', 'width': '80%'},
+    className=['ml-2', 'mb-2', 'mt-2']
 )
 
-host_card = dbc.Card(
+row = html.Div(
     [
-        dbc.CardHeader("Property Amenities"),
-        dbc.CardBody([
-            html.H6("Write in Amenities"),
-            dbc.Badge("Success", color="success", className="mr-1"),
-            dbc.Textarea(
-                invalid=False,
-                bs_size="sm",
-                id='amenities',
-                placeholder="Example:\n"
-                            "A loft with 2 bedrooms, patio and WiFi internet. "
-                            "Prefer first floor and no stairs with a view of the ocean.",
-                style={'width': '100%', 'height': '80%'},
-            )
-        ])
-    ],
-    className='mb-1'
+        dbc.Row(
+            [
+                html.Span(html.H1("Predict Your Airbnb Rate", className='mb-5'))
+            ]),
+        dbc.Row(dbc.Col(
+            html.Div(
+                html.H2("Dream Getaway 🛩"),
+                style={'align': 'center'}
+            ))
+        ),
+        dbc.Row(
+            [
+                dbc.Col((html.Div(input_block))),
+                dbc.Col([
+                    html.H2("🤖 Estimated Price", className='mb-2'),
+                    dbc.Alert(id='prediction-content', color='info')
+                ], style={'margin': 'auto'})
+            ]
+        )
+    ]
 )
 
-layout = dbc.Row([dbc.CardDeck(dbc.Col([property_card, host_card]), style={'width': '50%'})])
+
+@app.callback(
+    Output('prediction-content', 'children'),
+    [Input('submit-button', 'n_clicks'), Input('dropdown', 'value'), Input('amenities', 'value')]
+)
+def predict(n_clicks, dropdown, amenities):
+    if n_clicks > 0:
+        property_type = [dropdown]
+        description_text = amenities
+        building = encoder.transform(property_type)
+        building = keras.utils.to_categorical(building, 13)
+
+        max_seq_length = 170
+        embed = tokenizer.texts_to_sequences(description_text)
+        embed = keras.preprocessing.sequence.pad_sequences(
+            embed, maxlen=max_seq_length, padding="post")
+
+        description_bow = tokenizer.texts_to_matrix(description_text)
+        building_transform = [list(building[0]) for n in range(description_bow.shape[0])]
+        building = np.array(building_transform)
+
+        predictions = combined.predict([description_bow, building] + [embed])
+        val = float(predictions.mean())
+        return f'Estimated rent is ${round(val, 2)} per night.'
+    elif n_clicks == 0:
+        return "⤶\t\tGimme something to predict, please!\t"
+    else:
+        pass
+
+
+layout = row
