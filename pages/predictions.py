@@ -14,6 +14,7 @@ import joblib
 from keras.models import load_model
 
 from joblib import load
+
 tokenizer = load('assets/tokenizer.joblib')
 encoder = joblib.load('assets/label_encoder.joblib')
 combined = load_model('assets/best_model.h5')
@@ -66,8 +67,7 @@ input_block = dbc.FormGroup(
             className='mr-1',
             color="success",
             block=True,
-            outline=False,
-            active=True
+            outline=False
         ),
     ],
     style={'align': 'left', 'width': '50%'},
@@ -94,13 +94,13 @@ row = html.Div(
     ]
 )
 
+
 @app.callback(
     Output('prediction-content', 'children'),
     [Input('dropdown', 'value'), Input('amenities', 'value')],
 )
 def predict(dropdown, amenities):
-    property_type = []
-    property_type.append(dropdown)
+    property_type = [dropdown]
     description_text = amenities
     building = encoder.transform(property_type)
     building = keras.utils.to_categorical(building, 13)
