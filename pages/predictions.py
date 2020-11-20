@@ -10,20 +10,20 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from sklearn.pipeline import Pipeline
-from tensorflow.keras import Sequential, regularizers
-
-from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Flatten, ReLU
-from tensorflow.keras.activations import sigmoid, softmax, relu
-
-from spacy.tokenizer import Tokenizer
-from sklearn.pipeline import Pipeline
-from sklearn.neighbors import NearestNeighbors
-from gensim.models import LdaMulticore
-from gensim.corpora import Dictionary
-
-from sklearn.preprocessing import LabelEncoder
-from sklearn.pipeline import Pipeline
+# from sklearn.pipeline import Pipeline
+# from tensorflow.keras import Sequential, regularizers
+#
+# from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Flatten, ReLU
+# from tensorflow.keras.activations import sigmoid, softmax, relu
+#
+# from spacy.tokenizer import Tokenizer
+# from sklearn.pipeline import Pipeline
+# from sklearn.neighbors import NearestNeighbors
+# from gensim.models import LdaMulticore
+# from gensim.corpora import Dictionary
+#
+# from sklearn.preprocessing import LabelEncoder
+# from sklearn.pipeline import Pipeline
 import joblib
 from keras.models import load_model
 
@@ -57,7 +57,7 @@ input_block = dbc.FormGroup(
                 {'label': 'Other', 'value': 'Other'},
                 {'label': 'Boutique Hotel', 'value': 'Boutique hotel'}
             ],
-            placeholder='Loft',  # default value
+            value='Loft',  # default value
             multi=False,
             style={'margin': 'auto'}
         ),
@@ -68,8 +68,7 @@ input_block = dbc.FormGroup(
             invalid=False,
             bs_size="sm",
             id='amenities',
-            placeholder="Has 2 bedrooms, patio and WiFi internet. "
-                        "Prefer first floor and no stairs with a view of the ocean.",
+            value="Has 2 bedrooms, patio and WiFi internet. Prefer first floor and no stairs with a view of the ocean.",
             style={'margin': 'auto'},
         ),
         dbc.FormText("Write in what you'd like, in English or German!"),
@@ -81,7 +80,8 @@ input_block = dbc.FormGroup(
             className='mr-1',
             color="success",
             block=True,
-            outline=False
+            outline=False,
+            active=True
         ),
     ],
     style={'align': 'left', 'width': '50%'},
@@ -115,7 +115,7 @@ row = html.Div(
 def predict(dropdown, amenities):
     property_type = []
     property_type.append(dropdown)
-    description_text = str(amenities)
+    description_text = amenities
     building = encoder.transform(property_type)
     building = keras.utils.to_categorical(building, 13)
 
